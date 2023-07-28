@@ -163,11 +163,39 @@ app.get('/getQrCode', async (req, res) => {
 
 
 //fsdfasdsdsdsdsdsdsdsdsd
+const client = new Client()
+client.initialize();
+client.on('ready', async()=>{
+  for(let i = 0; i < numbers.length; i++ ){
+    
+    const myInterval = setInterval(myTimer, 5000);
+  async function myTimer(){
 
+  
+    let number = numbers[i];
+    // let number = "8729912858";
+  const sanitized_number = number.toString().replace(/[- )(]/g, ""); // remove unnecessary chars from the number
+
+  const final_number = `91${sanitized_number.substring(sanitized_number.length - 10)}`; // add 91 before the number here 91 is country code of India
+  // for(let i =0; i<5; i++){
+      const number_details = await client.getNumberId(final_number); // get mobile number details
+      
+      if (number_details) {
+          const sendMessageData = await client.sendMessage(number_details._serialized, message); // send message
+      } else {
+          console.log(final_number, "Mobile number is not registered");
+      }
+   }
+   if(i === numbers.length -1){
+    clearInterval(myInterval);
+   }
+  }
+// }
+
+
+});
 app.get('/generateQRCode', async(req, res)=>{
   try {
-    const client = new Client()
-    client.initialize();
     let qr = await new Promise((resolve, reject) => {
         client.once('qr', (qr) => resolve(qr))
 
@@ -176,29 +204,16 @@ app.get('/generateQRCode', async(req, res)=>{
         }, 50000)
     })
     qrcode.generate(qr, { small: true });
-    res.json({qrCode:qr})
-    client.on('ready', async()=>{
-      for(let i = 0; i < numbers.length; i++ ){
-        let number = numbers[i];
-      const sanitized_number = number.toString().replace(/[- )(]/g, ""); // remove unnecessary chars from the number
-
-      const final_number = `91${sanitized_number.substring(sanitized_number.length - 10)}`; // add 91 before the number here 91 is country code of India
-      // for(let i =0; i<5; i++){
-          const number_details = await client.getNumberId(final_number); // get mobile number details
-          
-          if (number_details) {
-              const sendMessageData = await client.sendMessage(number_details._serialized, message); // send message
-          } else {
-              console.log(final_number, "Mobile number is not registered");
-          }
-      // }
-    }
-     return res.status(200).json({message: "messeage sent completed!"})
+    return res.status(200).json({qrCode:qr})
     
-    });
 } catch (err) {
-    res.send(err.message, 'fjdslkajfas')
+    return res.send(err.message, 'fjdslkajfas')
 }
+});
+
+
+
+
 //   client.initialize();
 
 // // Event listener for receiving QR code and emitting to the frontend
@@ -225,7 +240,7 @@ app.get('/generateQRCode', async(req, res)=>{
 
   // return res.status(200).json({ message: "numbers stored sucessfully", message: message})
   
-})
+
 
 
 
